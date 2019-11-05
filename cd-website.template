@@ -328,7 +328,19 @@
                   "Version": "1"
                 },
                 "Configuration": {
-                  "ProjectName": { "Ref": "BuildProject" }
+                  "ProjectName": { "Ref": "BuildProject" },
+                  "EnvironmentVariables": { 
+                    "Fn::Join": [
+                      "",
+                      [
+                        "[{ \"name\":\"OUTPUT_BUCKET\", \"value\": \"",
+                        {
+                          "Ref": "RootBucket"
+                        },
+                        "\", \"type\":\"PLAINTEXT\" }]"
+                      ]
+                    ]
+                  }
                 },
                 "Name": "BuildTheWebsite",
                 "InputArtifacts": [{ "Name": "SourceOutput" }]
