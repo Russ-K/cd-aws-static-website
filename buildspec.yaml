@@ -24,8 +24,7 @@ phases:
   post_build:
     commands:
       - echo Entered the post_build phase...
-      - echo aws s3 cp --recursive openApi s3://$OUTPUT_BUCKET
-      - aws s3 ls s3://$OUTPUT_BUCKET
+      - aws s3 cp --recursive public s3://$OUTPUT_BUCKET
       - echo Build completed on `date`
 artifacts:
   files:
