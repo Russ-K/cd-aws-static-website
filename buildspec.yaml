@@ -18,6 +18,7 @@ phases:
     commands:
       - echo Entered the build phase...
       - ls
+      - gatsby build
     finally:
       - echo This always runs even if the install command fails
   post_build:
