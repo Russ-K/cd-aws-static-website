@@ -4,7 +4,9 @@ phases:
   install:
     commands:
       - echo Entered the install phase...
-      - npm install gatsby
+      - npm install -g gatsby
+      - cd site
+      - npm install
     finally:
       - echo This always runs even if the update or install command fails 
   pre_build:
