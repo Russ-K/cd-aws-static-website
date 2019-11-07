@@ -24,7 +24,7 @@ phases:
   post_build:
     commands:
       - echo Entered the post_build phase...
-      - aws s3 cp --recursive public s3://$OUTPUT_BUCKET
+      - aws s3 sync public s3://$OUTPUT_BUCKET --delete --size-only
       - echo Build completed on `date`
 artifacts:
   files:
