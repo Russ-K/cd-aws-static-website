@@ -11,3 +11,5 @@ This repo contains a simple template for building a website auto deployment pipe
 It assumes you've already bought the domain using Route53
 
 I've also included a buildspec file in this repo to get you started with your build.
+
+![screenshot for instruction](images/template.png)
