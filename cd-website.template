@@ -178,7 +178,7 @@
               "Sid": "CodeCommitPolicy",
               "Effect": "Allow",
               "Action": ["codecommit:GitPull"],
-              "Resource": ["*"]
+              "Resource": [{ "Fn::GetAtt": ["SourceRepo", "Arn"] }]
             },
             {
               "Sid": "S3GetObjectPolicy",
