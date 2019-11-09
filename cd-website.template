@@ -181,16 +181,28 @@
               "Resource": [{ "Fn::GetAtt": ["SourceRepo", "Arn"] }]
             },
             {
-              "Sid": "S3GetObjectPolicy",
+              "Sid": "RootBucketPolicy",
               "Effect": "Allow",
-              "Action": ["s3:*"],
-              "Resource": ["*"]
+              "Action": [
+                "s3:DeleteObject",
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+              ],
+              "Resource": [
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "RootBucket"}, "/*"]]},
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "RootBucket"}]]}
+              ]
             },
             {
-              "Sid": "S3PutObjectPolicy",
+              "Sid": "BuildBucketPolicy",
               "Effect": "Allow",
               "Action": ["s3:*"],
-              "Resource": ["*"]
+              "Resource": [
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}, "/*"]]},
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}]]}
+              ]
             }
           ]
         },
