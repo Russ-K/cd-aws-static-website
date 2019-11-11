@@ -287,8 +287,8 @@
             {
               "Sid": "CodeBuildPolicy",
               "Effect": "Allow",
-              "Action": ["codebuild:*"],
-              "Resource": ["*"]
+              "Action": ["codebuild:StartBuild"],
+              "Resource": [{ "Fn::GetAtt": ["BuildProject", "Arn"] }]
             }
           ]
         },
