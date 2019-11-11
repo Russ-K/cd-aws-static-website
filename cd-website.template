@@ -198,7 +198,10 @@
             {
               "Sid": "BuildBucketPolicy",
               "Effect": "Allow",
-              "Action": ["s3:*"],
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+              ],
               "Resource": [
                 { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}, "/*"]]},
                 { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}]]}
