@@ -175,12 +175,6 @@
               "Resource": ["*"]
             },
             {
-              "Sid": "CodeCommitPolicy",
-              "Effect": "Allow",
-              "Action": ["codecommit:GitPull"],
-              "Resource": [{ "Fn::GetAtt": ["SourceRepo", "Arn"] }]
-            },
-            {
               "Sid": "RootBucketPolicy",
               "Effect": "Allow",
               "Action": [
@@ -272,8 +266,13 @@
             {
               "Sid": "CodeCommitPolicy",
               "Effect": "Allow",
-              "Action": ["codecommit:*"],
-              "Resource": ["*"]
+              "Action": [
+                "codecommit:GetBranch",
+                "codecommit:GetCommit",
+                "codecommit:UploadArchive",
+                "codecommit:GetUploadArchiveStatus"
+              ],
+              "Resource": [{ "Fn::GetAtt": ["SourceRepo", "Arn"] }]
             },
             {
               "Sid": "S3GetObjectPolicy",
