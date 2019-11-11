@@ -275,16 +275,15 @@
               "Resource": [{ "Fn::GetAtt": ["SourceRepo", "Arn"] }]
             },
             {
-              "Sid": "S3GetObjectPolicy",
+              "Sid": "BuildBucketPolicy",
               "Effect": "Allow",
-              "Action": ["s3:*"],
-              "Resource": ["*"]
-            },
-            {
-              "Sid": "S3PutObjectPolicy",
-              "Effect": "Allow",
-              "Action": ["s3:*"],
-              "Resource": ["*"]
+              "Action": [
+                "s3:PutObject"
+              ],
+              "Resource": [
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}, "/*"]]},
+                { "Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "BuildBucket"}]]}
+              ]
             },
             {
               "Sid": "CodeBuildPolicy",
