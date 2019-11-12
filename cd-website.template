@@ -287,7 +287,10 @@
             {
               "Sid": "CodeBuildPolicy",
               "Effect": "Allow",
-              "Action": ["codebuild:StartBuild"],
+              "Action": [
+                "codebuild:StartBuild",
+                "codebuild:BatchGetBuilds"
+              ],
               "Resource": [{ "Fn::GetAtt": ["BuildProject", "Arn"] }]
             }
           ]
