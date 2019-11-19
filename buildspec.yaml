@@ -26,6 +26,7 @@ phases:
       - echo Entered the post_build phase...
       - aws s3 sync public s3://$OUTPUT_BUCKET --delete --size-only
       - echo Build completed on `date`
-artifacts:
-  files:
-    - 'public/*'
+cache:
+  paths:
+    - 'site/.cache/*'
+    - 'site/node_modules/*'
