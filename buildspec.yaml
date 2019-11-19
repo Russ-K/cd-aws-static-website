@@ -24,7 +24,8 @@ phases:
   post_build:
     commands:
       - echo Entered the post_build phase...
-      - aws s3 sync public s3://$OUTPUT_BUCKET --delete --size-only
+      - echo sync the public folder to s3
+      - aws s3 sync public s3://$OUTPUT_BUCKET --delete
       - echo Build completed on `date`
 cache:
   paths:
