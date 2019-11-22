@@ -139,6 +139,68 @@
       }
     },
 
+    "TheCloudFrontOriginAccessIdentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": { "Fn::Sub": "CloudFront OAI for ${RootDomainName}" }
+        }
+      }
+    },
+
+    "WebsiteDistribution" : {
+      "Type" : "AWS::CloudFront::Distribution",
+      "Properties" : {
+        "DistributionConfig" : {
+          "Origins" : [ {
+            "DomainName" : {
+              "Fn::GetAtt": [
+                "RootBucket",
+                "DomainName"
+              ]
+            },
+            "Id" : "myS3Origin",
+            "S3OriginConfig" : {
+              "OriginAccessIdentity" : {
+                "Fn::Join": ["", ["origin-access-identity/cloudfront/", { "Ref": "TheCloudFrontOriginAccessIdentity" }]]
+              }
+            }
+          }],
+          "Enabled" : "true",
+          "Comment" : "",
+          "DefaultRootObject" : "index.html",
+          "Logging" : {
+            "IncludeCookies" : "false",
+            "Bucket" : {
+              "Fn::GetAtt": [
+                "CFLogsBucket",
+                "DomainName"
+              ]
+            },
+            "Prefix" : ""
+          },
+          "Aliases" : [ { "Ref": "WWWBucket" } ],
+          "DefaultCacheBehavior" : {
+            "Compress": "true",
+            "ForwardedValues" : {
+                "QueryString" : "false"
+            },
+            "TargetOriginId" : "myS3Origin",
+            "ViewerProtocolPolicy" : "redirect-to-https"
+          },
+          "PriceClass" : "PriceClass_100",
+          "ViewerCertificate" : {
+            "AcmCertificateArn": { "Ref": "CertificateARN" },
+            "MinimumProtocolVersion": "TLSv1.1_2016",
+            "SslSupportMethod": "sni-only"
+          }
+        }
+      },
+      "DependsOn": [
+        "RootBucket"
+      ]
+    },
+
     "SourceRepo": {
       "Type": "AWS::CodeCommit::Repository",
       "Properties": {
