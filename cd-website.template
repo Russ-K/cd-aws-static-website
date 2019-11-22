@@ -18,6 +18,11 @@
       "Type": "String",
       "Default": "",
       "Description": "domain name bucket hosting the website"
+    },
+    "CertificateARN": {
+      "Type": "String",
+      "Default": "",
+      "Description": "ARN of the certificate for the domain"
     }
   },
   "Resources": {
