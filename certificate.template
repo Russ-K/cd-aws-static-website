@@ -1,0 +1,19 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "RootDomainName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "domain name for which the certificate needs to be verified"
+    }
+  },
+  "Resources": {
+    "SiteCert" : {
+      "Type" : "AWS::CertificateManager::Certificate",
+      "Properties" : {
+        "DomainName" : { "Fn::Sub": "*.${RootDomainName}" },
+        "ValidationMethod": "DNS"
+      }
+    }
+  }
+}
