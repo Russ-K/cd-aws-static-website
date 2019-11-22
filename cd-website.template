@@ -79,11 +79,12 @@
             "Name": { "Ref": "RootDomainName" },
             "Type": "A",
             "AliasTarget": {
-              "HostedZoneId": {
-                "Fn::FindInMap": ["RegionMap", { "Ref": "AWS::Region" }, "S3hostedzoneID"]
-              },
+              "HostedZoneId": "Z2FDTNDATAQYW2",
               "DNSName": {
-                "Fn::FindInMap": ["RegionMap", { "Ref": "AWS::Region" }, "websiteendpoint"]
+                "Fn::GetAtt": [
+                  "WebsiteDistribution",
+                  "DomainName"
+                ]
               }
             }
           },
@@ -93,17 +94,17 @@
             },
             "Type": "A",
             "AliasTarget": {
-              "HostedZoneId": {
-                "Fn::FindInMap": ["RegionMap", { "Ref": "AWS::Region" }, "S3hostedzoneID"]
-              },
+              "HostedZoneId": "Z2FDTNDATAQYW2",
               "DNSName": {
-                "Fn::FindInMap": ["RegionMap", { "Ref": "AWS::Region" }, "websiteendpoint"]
+                "Fn::GetAtt": [
+                  "WebsiteDistribution",
+                  "DomainName"
+                ]
               }
             }
           }
         ]
-      },
-      "DependsOn": ["WebsiteHostedZone"]
+      }
     },
 
     "BucketPolicy": {
