@@ -21,20 +21,17 @@
     }
   },
   "Resources": {
-    "WebsiteHostedZone": {
-      "Type": "AWS::Route53::HostedZone",
-      "Properties": {
-        "HostedZoneConfig": {
-          "Comment": { "Fn::Sub": "Hosted zone for ${RootDomainName}" }
-        },
-        "Name": { "Fn::Sub": "${RootDomainName}" }
-      }
-    },
-
     "BuildBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "BucketName": { "Fn::Sub": "${RootDomainName}-build-bucket" }
+      }
+    },
+
+    "CFLogsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": { "Fn::Sub": "${RootDomainName}-cloudfront-logs" }
       }
     },
 
