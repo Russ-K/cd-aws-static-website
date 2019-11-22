@@ -1,0 +1,45 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "RootDomainName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "domain name for which the certificate needs to be verified"
+    },
+    "HostedZoneId": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Zone Id for the hosted zone of the domain name"
+    },
+    
+    "VerificationName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Name of the CNAME entry to add for verifying the domain"
+    },
+    "VerificationValue": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Name of the CNAME entry to add for verifying the domain"
+    }
+  },
+  "Resources": {
+    "CertValidation": {
+      "Type": "AWS::Route53::RecordSetGroup",
+      "Properties": {
+        "HostedZoneId": { "Ref": "HostedZoneId" },
+        "Comment": "Certificate verification entry.",
+        "RecordSets": [
+          {
+            "Name" : { "Ref": "VerificationName" },
+            "Type" : "CNAME",
+            "TTL" : "900",
+            "SetIdentifier" : "Frontend One",
+            "Weight" : "4",
+            "ResourceRecords" : [ { "Ref": "VerificationValue" } ]
+          }
+        ]
+      }
+    }
+  }
+}
