@@ -1,4 +1,4 @@
-# Serverless Continuous Deploymeny Website builder
+# Serverless Continuous Deployment Website builder
 
 This repo contains a simple template for building a website auto deployment pipeline using the following AWS technologies:
 * Code Pipeline
@@ -11,7 +11,7 @@ This repo contains a simple template for building a website auto deployment pipe
 
 It assumes you've already bought the domain using Route53
 
-I've also included a buildspec file in this repo to get you started with your build.
+Also included in this repo is a buildspec file to get a build started.
 
 You'll need to deploy the templates in the following order:
 
