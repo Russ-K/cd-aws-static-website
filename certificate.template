@@ -11,7 +11,8 @@
     "SiteCert" : {
       "Type" : "AWS::CertificateManager::Certificate",
       "Properties" : {
-        "DomainName" : { "Fn::Sub": "*.${RootDomainName}" },
+        "DomainName" : { "Fn::Sub": "${RootDomainName}" },
+        "SubjectAlternativeNames" : [ { "Fn::Sub": "*.${RootDomainName}" } ],
         "ValidationMethod": "DNS"
       }
     }
