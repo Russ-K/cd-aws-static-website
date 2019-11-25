@@ -45,27 +45,14 @@
             "Type": "String",
             "Default": "",
             "Description": "domain name bucket hosting the website"
+        },
+        "CertificateARN": {
+            "Type": "String",
+            "Default": "",
+            "Description": "ARN of the certificate for the domain"
         }
     },
     "Resources": {
-        "WebsiteHostedZone": {
-            "Type": "AWS::Route53::HostedZone",
-            "Properties": {
-                "HostedZoneConfig": {
-                    "Comment": {
-                        "Fn::Sub": "Hosted zone for ${RootDomainName}"
-                    }
-                },
-                "Name": {
-                    "Fn::Sub": "${RootDomainName}"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "5f111d2c-3bae-46fa-98b3-07fdf68c1dcd"
-                }
-            }
-        },
         "BuildBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
@@ -75,7 +62,20 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "b7a75167-28ac-471f-bf63-57414e6618af"
+                    "id": "cf940c5e-c869-43f0-8081-b292e525178a"
+                }
+            }
+        },
+        "CFLogsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Sub": "${RootDomainName}-cloudfront-logs"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "50917211-fe82-4ae3-86ca-450a21abe804"
                 }
             }
         },
@@ -93,7 +93,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "1ebf61ff-1c8a-4779-b51f-cb3b5151e5fd"
+                    "id": "dd3b7ac5-4728-4022-b154-6647910691a6"
                 }
             }
         },
@@ -122,7 +122,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "823e4385-5ae9-40d6-b879-2caf123ab49a"
+                    "id": "bf9943a5-a131-4aa5-9ee8-d89b1b02fca1"
                 }
             }
         },
@@ -148,22 +148,11 @@
                         },
                         "Type": "A",
                         "AliasTarget": {
-                            "HostedZoneId": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "S3hostedzoneID"
-                                ]
-                            },
+                            "HostedZoneId": "Z2FDTNDATAQYW2",
                             "DNSName": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "websiteendpoint"
+                                "Fn::GetAtt": [
+                                    "WebsiteDistribution",
+                                    "DomainName"
                                 ]
                             }
                         }
@@ -182,34 +171,20 @@
                         },
                         "Type": "A",
                         "AliasTarget": {
-                            "HostedZoneId": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "S3hostedzoneID"
-                                ]
-                            },
+                            "HostedZoneId": "Z2FDTNDATAQYW2",
                             "DNSName": {
-                                "Fn::FindInMap": [
-                                    "RegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "websiteendpoint"
+                                "Fn::GetAtt": [
+                                    "WebsiteDistribution",
+                                    "DomainName"
                                 ]
                             }
                         }
                     }
                 ]
             },
-            "DependsOn": [
-                "WebsiteHostedZone"
-            ],
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "358098eb-fb65-4e3f-bb7a-55677978c706"
+                    "id": "088f7b28-7f0b-46b5-97ec-9e1dca46b4d4"
                 }
             }
         },
@@ -246,7 +221,98 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "5af13964-94ed-42dd-897a-a6eecdf2bdcf"
+                    "id": "13696bb6-f639-4bad-a4bf-edcfa2d9a526"
+                }
+            }
+        },
+        "TheCloudFrontOriginAccessIdentity": {
+            "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+            "Properties": {
+                "CloudFrontOriginAccessIdentityConfig": {
+                    "Comment": {
+                        "Fn::Sub": "CloudFront OAI for ${RootDomainName}"
+                    }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "70022798-09e1-4a18-96cb-400834ae4820"
+                }
+            }
+        },
+        "WebsiteDistribution": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Origins": [
+                        {
+                            "DomainName": {
+                                "Fn::GetAtt": [
+                                    "RootBucket",
+                                    "DomainName"
+                                ]
+                            },
+                            "Id": "myS3Origin",
+                            "S3OriginConfig": {
+                                "OriginAccessIdentity": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "origin-access-identity/cloudfront/",
+                                            {
+                                                "Ref": "TheCloudFrontOriginAccessIdentity"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "Enabled": "true",
+                    "Comment": "",
+                    "DefaultRootObject": "index.html",
+                    "Logging": {
+                        "IncludeCookies": "false",
+                        "Bucket": {
+                            "Fn::GetAtt": [
+                                "CFLogsBucket",
+                                "DomainName"
+                            ]
+                        },
+                        "Prefix": ""
+                    },
+                    "Aliases": [
+                        {
+                            "Ref": "RootBucket"
+                        },
+                        {
+                            "Ref": "WWWBucket"
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "Compress": "true",
+                        "ForwardedValues": {
+                            "QueryString": "false"
+                        },
+                        "TargetOriginId": "myS3Origin",
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": {
+                            "Ref": "CertificateARN"
+                        },
+                        "MinimumProtocolVersion": "TLSv1.1_2016",
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            },
+            "DependsOn": [
+                "RootBucket"
+            ],
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "d66e9747-f706-45c0-94ed-6908b3979b04"
                 }
             }
         },
@@ -260,7 +326,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "b6f8aa30-7fc1-4579-b4a5-8c7da90d4952"
+                    "id": "f467c1ce-174b-43fb-88dc-ca2ebccc146c"
                 }
             }
         },
@@ -286,7 +352,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "29595aee-4dd7-4d04-aa88-8167246079f5"
+                    "id": "e5fb7e2f-9d2c-4bd0-b4a9-3027e5635694"
                 }
             }
         },
@@ -309,33 +375,72 @@
                             ]
                         },
                         {
-                            "Sid": "CodeCommitPolicy",
+                            "Sid": "RootBucketPolicy",
                             "Effect": "Allow",
                             "Action": [
-                                "codecommit:GitPull"
+                                "s3:DeleteObject",
+                                "s3:GetBucketLocation",
+                                "s3:GetObject",
+                                "s3:ListBucket",
+                                "s3:PutObject"
                             ],
                             "Resource": [
-                                "*"
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "RootBucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "RootBucket"
+                                            }
+                                        ]
+                                    ]
+                                }
                             ]
                         },
                         {
-                            "Sid": "S3GetObjectPolicy",
+                            "Sid": "BuildBucketPolicy",
                             "Effect": "Allow",
                             "Action": [
-                                "s3:*"
+                                "s3:GetObject",
+                                "s3:PutObject"
                             ],
                             "Resource": [
-                                "*"
-                            ]
-                        },
-                        {
-                            "Sid": "S3PutObjectPolicy",
-                            "Effect": "Allow",
-                            "Action": [
-                                "s3:*"
-                            ],
-                            "Resource": [
-                                "*"
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "BuildBucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "BuildBucket"
+                                            }
+                                        ]
+                                    ]
+                                }
                             ]
                         }
                     ]
@@ -348,7 +453,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "329a16cd-a550-4d9a-ae26-0df5056c3d12"
+                    "id": "13ba31e2-189e-4d7b-ab3a-c0147d03716d"
                 }
             }
         },
@@ -366,6 +471,20 @@
                     "Packaging": "NONE"
                 },
                 "BadgeEnabled": true,
+                "Cache": {
+                    "Location": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                {
+                                    "Ref": "BuildBucket"
+                                },
+                                "/cache"
+                            ]
+                        ]
+                    },
+                    "Type": "S3"
+                },
                 "Environment": {
                     "ComputeType": "BUILD_GENERAL1_SMALL",
                     "Image": "aws/codebuild/nodejs:10.14.1",
@@ -389,7 +508,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "b7382b3f-9726-49fc-9a85-b32f2f3a636f"
+                    "id": "cc9bb583-f78a-4876-a873-fa3a7870aa94"
                 }
             }
         },
@@ -415,7 +534,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "a739b8cd-a351-43df-adcc-ca851ea3465f"
+                    "id": "bde392dc-ddac-4d53-bb06-f30a7d2c5e9b"
                 }
             }
         },
@@ -441,40 +560,66 @@
                             "Sid": "CodeCommitPolicy",
                             "Effect": "Allow",
                             "Action": [
-                                "codecommit:*"
+                                "codecommit:GetBranch",
+                                "codecommit:GetCommit",
+                                "codecommit:UploadArchive",
+                                "codecommit:GetUploadArchiveStatus"
                             ],
                             "Resource": [
-                                "*"
+                                {
+                                    "Fn::GetAtt": [
+                                        "SourceRepo",
+                                        "Arn"
+                                    ]
+                                }
                             ]
                         },
                         {
-                            "Sid": "S3GetObjectPolicy",
+                            "Sid": "BuildBucketPolicy",
                             "Effect": "Allow",
                             "Action": [
-                                "s3:*"
+                                "s3:PutObject"
                             ],
                             "Resource": [
-                                "*"
-                            ]
-                        },
-                        {
-                            "Sid": "S3PutObjectPolicy",
-                            "Effect": "Allow",
-                            "Action": [
-                                "s3:*"
-                            ],
-                            "Resource": [
-                                "*"
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "BuildBucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "BuildBucket"
+                                            }
+                                        ]
+                                    ]
+                                }
                             ]
                         },
                         {
                             "Sid": "CodeBuildPolicy",
                             "Effect": "Allow",
                             "Action": [
-                                "codebuild:*"
+                                "codebuild:StartBuild",
+                                "codebuild:BatchGetBuilds"
                             ],
                             "Resource": [
-                                "*"
+                                {
+                                    "Fn::GetAtt": [
+                                        "BuildProject",
+                                        "Arn"
+                                    ]
+                                }
                             ]
                         }
                     ]
@@ -487,7 +632,7 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "261461ae-cccb-4c68-85f7-a247ecd53188"
+                    "id": "d7de886f-116f-4fb2-afc2-1f31ffddeeda"
                 }
             }
         },
@@ -576,179 +721,200 @@
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
-                    "id": "cd3137c9-27ee-46f4-aa2f-9ef5ea47a9d6"
+                    "id": "38cef941-436b-4bdc-bb27-fa6b8a5f6cc8"
                 }
             }
         }
     },
     "Metadata": {
         "AWS::CloudFormation::Designer": {
-            "a739b8cd-a351-43df-adcc-ca851ea3465f": {
+            "bde392dc-ddac-4d53-bb06-f30a7d2c5e9b": {
                 "size": {
                     "width": 60,
                     "height": 60
                 },
                 "position": {
-                    "x": 560,
+                    "x": 0,
                     "y": 430
                 },
                 "z": 1,
                 "embeds": []
             },
-            "261461ae-cccb-4c68-85f7-a247ecd53188": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 560,
-                    "y": 550
-                },
-                "z": 1,
-                "embeds": [],
-                "isassociatedwith": [
-                    "a739b8cd-a351-43df-adcc-ca851ea3465f"
-                ]
-            },
-            "29595aee-4dd7-4d04-aa88-8167246079f5": {
+            "e5fb7e2f-9d2c-4bd0-b4a9-3027e5635694": {
                 "size": {
                     "width": 60,
                     "height": 60
                 },
                 "position": {
                     "x": 120,
+                    "y": 70
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "f467c1ce-174b-43fb-88dc-ca2ebccc146c": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -120,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "70022798-09e1-4a18-96cb-400834ae4820": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 480,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "dd3b7ac5-4728-4022-b154-6647910691a6": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "13696bb6-f639-4bad-a4bf-edcfa2d9a526": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 430
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "dd3b7ac5-4728-4022-b154-6647910691a6"
+                ]
+            },
+            "bf9943a5-a131-4aa5-9ee8-d89b1b02fca1": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 190
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "50917211-fe82-4ae3-86ca-450a21abe804": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 360,
                     "y": 430
                 },
                 "z": 1,
                 "embeds": []
             },
-            "329a16cd-a550-4d9a-ae26-0df5056c3d12": {
+            "d66e9747-f706-45c0-94ed-6908b3979b04": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 360,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "088f7b28-7f0b-46b5-97ec-9e1dca46b4d4": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 480,
+                    "y": 190
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "cf940c5e-c869-43f0-8081-b292e525178a": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 0,
+                    "y": 190
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "cc9bb583-f78a-4876-a873-fa3a7870aa94": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -120,
+                    "y": 70
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "38cef941-436b-4bdc-bb27-fa6b8a5f6cc8": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 0,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "d7de886f-116f-4fb2-afc2-1f31ffddeeda": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -240,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "bde392dc-ddac-4d53-bb06-f30a7d2c5e9b"
+                ]
+            },
+            "13ba31e2-189e-4d7b-ab3a-c0147d03716d": {
                 "size": {
                     "width": 60,
                     "height": 60
                 },
                 "position": {
                     "x": 120,
-                    "y": 320
+                    "y": 190
                 },
                 "z": 1,
                 "embeds": [],
                 "isassociatedwith": [
-                    "29595aee-4dd7-4d04-aa88-8167246079f5"
-                ]
-            },
-            "b6f8aa30-7fc1-4579-b4a5-8c7da90d4952": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 410,
-                    "y": 550
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "1ebf61ff-1c8a-4779-b51f-cb3b5151e5fd": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 560,
-                    "y": 320
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "5af13964-94ed-42dd-897a-a6eecdf2bdcf": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 410,
-                    "y": 320
-                },
-                "z": 1,
-                "embeds": [],
-                "isassociatedwith": [
-                    "1ebf61ff-1c8a-4779-b51f-cb3b5151e5fd"
-                ]
-            },
-            "823e4385-5ae9-40d6-b879-2caf123ab49a": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 690,
-                    "y": 320
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "b7a75167-28ac-471f-bf63-57414e6618af": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 260,
-                    "y": 320
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "b7382b3f-9726-49fc-9a85-b32f2f3a636f": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 260,
-                    "y": 430
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "cd3137c9-27ee-46f4-aa2f-9ef5ea47a9d6": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 410,
-                    "y": 430
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "5f111d2c-3bae-46fa-98b3-07fdf68c1dcd": {
-                "size": {
-                    "width": 240,
-                    "height": 110
-                },
-                "position": {
-                    "x": 540,
-                    "y": 300
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "358098eb-fb65-4e3f-bb7a-55677978c706": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 690,
-                    "y": 430
-                },
-                "z": 1,
-                "embeds": [],
-                "dependson": [
-                    "5f111d2c-3bae-46fa-98b3-07fdf68c1dcd"
+                    "e5fb7e2f-9d2c-4bd0-b4a9-3027e5635694"
                 ]
             }
         }
