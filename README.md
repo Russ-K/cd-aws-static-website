@@ -36,4 +36,6 @@ Given the root domain name (e.g. "google.com") this template will create
     * will be set up to redirect traffic to the root bucket
 
 
+The following diagram is to show the dependencies between the various resources. Although it doesn't appear all that clear because some arrow lines overlap each other, keep in mind that each line only has an arrow on one end and then you should be able to work it out.
+
 ![screenshot for instruction](images/template.png)
