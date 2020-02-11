@@ -376,7 +376,7 @@
     "ProjectBuilderPipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
-        "Name": "WebsiteBuilderPipeline",
+        "Name": { "Fn::Sub": "${AWS::StackName}-WebsiteBuilderPipeline" },
         "ArtifactStore": {
           "Type": "S3",
           "Location": { "Ref": "BuildBucket" }
