@@ -180,7 +180,7 @@
             },
             "Prefix" : ""
           },
-          "Aliases" : [ { "Ref": "WWWBucket" } ],
+          "Aliases" : [ { "Ref": "WWWBucket" }, { "Ref": "RootBucket" } ],
           "DefaultCacheBehavior" : {
             "Compress": "true",
             "ForwardedValues" : {
